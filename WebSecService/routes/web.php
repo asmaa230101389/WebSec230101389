@@ -17,3 +17,11 @@ Route::get('/even', function () {
 Route::get('/prime', function () {
     return view('prime');
 });
+use App\Http\Controllers\EvenController;
+
+Route::get('/even', [EvenController::class, 'showEvenNumbers']);
+
+
+use App\Http\Controllers\PrimeController;
+
+Route::get('/prime', [PrimeController::class, 'showPrimeNumbers']);
