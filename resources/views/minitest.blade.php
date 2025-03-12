@@ -9,7 +9,7 @@
 </head>
 <body>
     <div class="container">
-        <h1 class="mt-5">Supermarket Bill</h1>
+        <h1 class="mt-5">Supermarket Bill Test</h1>
         <table class="table table-striped">
             <thead>
                 <tr>
