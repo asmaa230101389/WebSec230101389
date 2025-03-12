@@ -19,3 +19,10 @@ Route::get('/minitest', function () {
     ];
     return view('minitest', compact('bill'));
 });
+Route::get('/transcript', function () {
+    $transcript = [
+        ['course' => 'Math', 'grade' => 85],
+        ['course' => 'Science', 'grade' => 90]
+    ];
+    return view('transcript', compact('transcript'));
+});

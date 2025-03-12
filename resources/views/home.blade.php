@@ -11,6 +11,7 @@
     <div class="container">
         <a href="{{ route('products_list') }}" class="btn btn-primary mt-3">View Products</a>
         <a href="{{ url('/minitest') }}" class="btn btn-success mt-3">MiniTest</a>
+        <a href="{{ url('/transcript') }}" class="btn btn-info mt-3">Transcript</a>
         <h1 class="mt-5">Welcome to WebSecService</h1>
        
     </div>
