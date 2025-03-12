@@ -52,3 +52,20 @@ Route::post('/calculator', function (Illuminate\Http\Request $request) {
 
     return view('calculator', compact('result', 'num1', 'num2', 'operation'));
 });
+Route::get('/gpa', function () {
+    return view('gpa');
+});
+Route::post('/gpa', function (Illuminate\Http\Request $request) {
+    $grades = $request->input('grades', []);
+    $hours = $request->input('hours', []);
+    $totalPoints = 0;
+    $totalHours = 0;
+
+    for ($i = 0; $i < count($grades); $i++) {
+        $totalPoints += $grades[$i] * $hours[$i];
+        $totalHours += $hours[$i];
+    }
+
+    $gpa = $totalHours > 0 ? $totalPoints / $totalHours : 0;
+    return view('gpa', compact('gpa', 'grades', 'hours'));
+});

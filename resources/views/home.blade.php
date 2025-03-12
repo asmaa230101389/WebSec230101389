@@ -13,6 +13,7 @@
         <a href="{{ url('/minitest') }}" class="btn btn-success mt-3">MiniTest</a>
         <a href="{{ url('/transcript') }}" class="btn btn-info mt-3">Transcript</a>
         <a href="{{ url('/calculator') }}" class="btn btn-warning mt-3">Calculator</a>
+        <a href="{{ url('/gpa') }}" class="btn btn-danger mt-3">GPA Simulator</a>
         <h1 class="mt-5">Welcome to WebSecService</h1>
        
     </div>
