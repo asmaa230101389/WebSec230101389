@@ -10,9 +10,10 @@
 <body>
     <div class="container">
         <a href="{{ route('products_list') }}" class="btn btn-primary mt-3">View Products</a>
+        <a href="{{ url('/minitest') }}" class="btn btn-success mt-3">MiniTest</a>
         <h1 class="mt-5">Welcome to WebSecService</h1>
-        <p class="bg-light p-3">This is a test paragraph.</p>
+       
     </div>
-    <p>Test change</p>
+    
 </body>
 </html>

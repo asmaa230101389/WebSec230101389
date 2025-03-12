@@ -9,3 +9,13 @@ Route::get('/', function () {
 
 
 Route::get('/products', [ProductController::class, 'list'])->name('products_list');
+Route::get('/minitest', function () {
+    $bill = [
+        'items' => [
+            ['name' => 'Milk', 'price' => 10],
+            ['name' => 'Bread', 'price' => 5]
+        ],
+        'total' => 15
+    ];
+    return view('minitest', compact('bill'));
+});
