@@ -85,3 +85,12 @@ Route::get('/grades', [GradeController::class, 'list'])->name('grades_list');
 Route::get('/grades/form/{id?}', [GradeController::class, 'form'])->name('grades_form');
 Route::post('/grades/save/{id?}', [GradeController::class, 'save'])->name('grades_save');
 Route::get('/grades/delete/{id}', [GradeController::class, 'delete'])->name('grades_delete');
+
+use App\Http\Controllers\Web\QuestionController;
+
+Route::get('/questions', [QuestionController::class, 'list'])->name('questions_list');
+Route::get('/questions/form/{id?}', [QuestionController::class, 'form'])->name('questions_form');
+Route::post('/questions/save/{id?}', [QuestionController::class, 'save'])->name('questions_save');
+Route::get('/questions/delete/{id}', [QuestionController::class, 'delete'])->name('questions_delete');
+Route::get('/exam', [QuestionController::class, 'startExam'])->name('exam_start');
+Route::post('/exam/submit', [QuestionController::class, 'submitExam'])->name('exam_submit');

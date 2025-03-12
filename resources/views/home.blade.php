@@ -17,6 +17,7 @@
         <a href="{{ route('students_list') }}" class="btn btn-dark mt-3">Students</a>
         <a href="{{ route('users_list') }}" class="btn btn-primary mt-3">Users</a>
         <a href="{{ route('grades_list') }}" class="btn btn-success mt-3">Grades</a>
+        <a href="{{ route('questions_list') }}" class="btn btn-info mt-3">MCQ Exam</a>
         <h1 class="mt-5">Welcome to WebSecService</h1>
        
     </div>
