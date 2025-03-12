@@ -69,3 +69,7 @@ Route::post('/gpa', function (Illuminate\Http\Request $request) {
     $gpa = $totalHours > 0 ? $totalPoints / $totalHours : 0;
     return view('gpa', compact('gpa', 'grades', 'hours'));
 });
+use App\Http\Controllers\Web\StudentController;
+
+Route::get('/students', [StudentController::class, 'list'])->name('students_list');
+Route::get('/students/delete/{id}', [StudentController::class, 'delete'])->name('students_delete');
