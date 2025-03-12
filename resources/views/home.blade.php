@@ -15,6 +15,8 @@
         <a href="{{ url('/calculator') }}" class="btn btn-warning mt-3">Calculator</a>
         <a href="{{ url('/gpa') }}" class="btn btn-danger mt-3">GPA Simulator</a>
         <a href="{{ route('students_list') }}" class="btn btn-dark mt-3">Students</a>
+        <a href="{{ route('users_list') }}" class="btn btn-primary mt-3">Users</a>
+        <a href="{{ route('grades_list') }}" class="btn btn-success mt-3">Grades</a>
         <h1 class="mt-5">Welcome to WebSecService</h1>
        
     </div>

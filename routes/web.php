@@ -73,3 +73,15 @@ use App\Http\Controllers\Web\StudentController;
 
 Route::get('/students', [StudentController::class, 'list'])->name('students_list');
 Route::get('/students/delete/{id}', [StudentController::class, 'delete'])->name('students_delete');
+use App\Http\Controllers\Web\UserController;
+
+Route::get('/users', [UserController::class, 'list'])->name('users_list');
+Route::get('/users/form/{id?}', [UserController::class, 'form'])->name('users_form');
+Route::post('/users/save/{id?}', [UserController::class, 'save'])->name('users_save');
+Route::get('/users/delete/{id}', [UserController::class, 'delete'])->name('users_delete');
+use App\Http\Controllers\Web\GradeController;
+
+Route::get('/grades', [GradeController::class, 'list'])->name('grades_list');
+Route::get('/grades/form/{id?}', [GradeController::class, 'form'])->name('grades_form');
+Route::post('/grades/save/{id?}', [GradeController::class, 'save'])->name('grades_save');
+Route::get('/grades/delete/{id}', [GradeController::class, 'delete'])->name('grades_delete');
