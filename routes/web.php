@@ -93,10 +93,12 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/profile', [UserController::class, 'profile'])->name('profile'); // تأكدي إنه موجود هنا
 
-    Route::get('/students', [StudentController::class, 'list'])->name('students_list');
-    Route::get('/students/delete/{id}', [StudentController::class, 'delete'])->name('students_delete');
-    // باقي المسارات
+    
 
+Route::get('/students', [StudentController::class, 'list'])->name('students_list');
+Route::get('/students/delete/{id}', [StudentController::class, 'delete'])->name('students_delete');
+Route::get('/students/edit/{id}', [StudentController::class, 'edit'])->name('students_edit');
+Route::put('/students/save/{id}', [StudentController::class, 'save'])->name('students_save');
 
     Route::get('/grades', [GradeController::class, 'list'])->name('grades_list');
     Route::get('/grades/form/{id?}', [GradeController::class, 'form'])->name('grades_form');

@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Students</title>
+    <title>Students List</title>
     <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
-    <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
 </head>
 <body>
-    <div class="container">
-        <h1 class="mt-5">Students List</h1>
+    @include('layouts.menu') <!-- لو عندك ملف menu مشترك -->
+    <div class="container mt-5">
+        <h1>Students List</h1>
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -21,14 +21,15 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($students as $student)
+                @foreach ($students as $student)
                     <tr>
                         <td>{{ $student->id }}</td>
                         <td>{{ $student->name }}</td>
                         <td>{{ $student->email }}</td>
-                        <td>{{ $student->phone ?? 'N/A' }}</td>
+                        <td>{{ $student->phone ?? 'N/A' }}</td> <!-- لو مافيش Phone يظهر N/A -->
                         <td>
-                            <a href="{{ route('students_delete', $student->id) }}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a>
+                            <a href="{{ route('students_edit', $student->id) }}" class="btn btn-sm btn-primary">Edit</a>
+                            <a href="{{ route('students_delete', $student->id) }}" class="btn btn-sm btn-danger">Delete</a>
                         </td>
                     </tr>
                 @endforeach
