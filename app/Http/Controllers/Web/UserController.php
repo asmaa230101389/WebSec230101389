@@ -49,13 +49,13 @@ class UserController extends Controller
         return redirect('/')->with('success', 'Logged out successfully!');
     }
     public function list(Request $request)
-{
-    if (!auth()->user()->is_admin) {
-        return redirect('/')->with('error', 'You are not authorized to view this page.');
+    {
+        if (!auth()->user()->hasPermissionTo('view users')) {
+            return redirect('/')->with('error', 'You are not authorized to view this page.');
+        }
+        $users = User::all();
+        return view('users.list', compact('users'));
     }
-    $users = User::all();
-    return view('users.list', compact('users'));
-}
 public function profile(Request $request)
 {
     $user = auth()->user();
