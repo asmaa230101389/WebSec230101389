@@ -95,11 +95,19 @@ Route::middleware('auth')->group(function () {
 
     
 
-Route::get('/students', [StudentController::class, 'list'])->name('students_list');
-Route::get('/students/delete/{id}', [StudentController::class, 'delete'])->name('students_delete');
-Route::get('/students/edit/{id}', [StudentController::class, 'edit'])->name('students_edit');
-Route::put('/students/save/{id}', [StudentController::class, 'save'])->name('students_save');
 
+
+
+
+
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/students', [StudentController::class, 'list'])->name('students_list')->middleware('can:view-students');
+        Route::get('/students/delete/{id}', [StudentController::class, 'delete'])->name('students_delete')->middleware('can:delete-students');
+        Route::get('/students/edit/{id}', [StudentController::class, 'edit'])->name('students_edit')->middleware('can:edit-students');
+        Route::put('/students/save/{id}', [StudentController::class, 'save'])->name('students_save')->middleware('can:edit-students');
+        Route::get('/students/create', [StudentController::class, 'create'])->name('students_create')->middleware('can:create-students');
+        Route::post('/students', [StudentController::class, 'store'])->name('students_store')->middleware('can:create-students');
+    });
     Route::get('/grades', [GradeController::class, 'list'])->name('grades_list');
     Route::get('/grades/form/{id?}', [GradeController::class, 'form'])->name('grades_form');
     Route::post('/grades/save/{id?}', [GradeController::class, 'save'])->name('grades_save');
