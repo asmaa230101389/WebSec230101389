@@ -6,12 +6,11 @@ use App\Http\Controllers\Web\StudentController;
 use App\Http\Controllers\Web\UserController;
 use App\Http\Controllers\Web\GradeController;
 use App\Http\Controllers\Web\QuestionController;
+use App\Http\Controllers\Web\EmployeeController;
 
 Route::get('/', function () {
     return view('home');
 });
-
-Route::get('/products', [ProductController::class, 'list'])->name('products_list');
 
 Route::get('/minitest', function () {
     $bill = [
@@ -91,23 +90,46 @@ Route::middleware('auth')->group(function () {
     Route::post('/users/save/{id?}', [UserController::class, 'save'])->name('users_save');
     Route::get('/users/delete/{id}', [UserController::class, 'delete'])->name('users_delete');
 
-    Route::get('/profile', [UserController::class, 'profile'])->name('profile'); // تأكدي إنه موجود هنا
+    Route::get('/users/profile', [UserController::class, 'profile'])->name('users.profile');
 
-    
+    // Products (للجميع لكن الشراء للـ Customers بس)
+    Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+    Route::post('/products/{id}/purchase', [ProductController::class, 'purchase'])->name('products.purchase')->middleware('can:purchase-products');
 
-
-
-
-
-
-    Route::middleware(['auth'])->group(function () {
-        Route::get('/students', [StudentController::class, 'list'])->name('students_list')->middleware('can:view-students');
-        Route::get('/students/delete/{id}', [StudentController::class, 'delete'])->name('students_delete')->middleware('can:delete-students');
-        Route::get('/students/edit/{id}', [StudentController::class, 'edit'])->name('students_edit')->middleware('can:edit-students');
-        Route::put('/students/save/{id}', [StudentController::class, 'save'])->name('students_save')->middleware('can:edit-students');
-        Route::get('/students/create', [StudentController::class, 'create'])->name('students_create')->middleware('can:create-students');
-        Route::post('/students', [StudentController::class, 'store'])->name('students_store')->middleware('can:create-students');
+    // Products Management (للـ Employees والـ Admin)
+    Route::middleware(['can:manage-products'])->group(function () {
+        Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
+        Route::post('/products', [ProductController::class, 'store'])->name('products.store');
+        Route::get('/products/{id}/edit', [ProductController::class, 'edit'])->name('products.edit');
+        Route::put('/products/{id}', [ProductController::class, 'update'])->name('products.update');
+        Route::delete('/products/{id}', [ProductController::class, 'destroy'])->name('products.destroy');
     });
+
+    // Employee Management (للـ Admin بس)
+    Route::middleware(['can:create-employees'])->group(function () {
+        Route::get('/employees/create', [EmployeeController::class, 'create'])->name('employees.create');
+        Route::post('/employees', [EmployeeController::class, 'store'])->name('employees.store');
+    });
+
+    // Employee Actions (للـ Employees والـ Admin)
+    Route::middleware(['can:view-customers'])->group(function () {
+        Route::get('/employees/customers', [EmployeeController::class, 'customers'])->name('employees.customers');
+        Route::post('/employees/customers/{id}/add-credit', [EmployeeController::class, 'addCredit'])->name('employees.add-credit')->middleware('can:add-credit');
+    });
+
+    // Purchases (للـ Customers)
+    Route::get('/purchases', function () {
+        $purchases = \App\Models\Purchase::where('user_id', auth()->id())->get();
+        return view('purchases.index', compact('purchases'));
+    })->name('purchases.index')->middleware('can:view-purchases');
+
+    Route::get('/students', [StudentController::class, 'list'])->name('students_list')->middleware('can:view-students');
+    Route::get('/students/delete/{id}', [StudentController::class, 'delete'])->name('students_delete')->middleware('can:delete-students');
+    Route::get('/students/edit/{id}', [StudentController::class, 'edit'])->name('students_edit')->middleware('can:edit-students');
+    Route::put('/students/save/{id}', [StudentController::class, 'save'])->name('students_save')->middleware('can:edit-students');
+    Route::get('/students/create', [StudentController::class, 'create'])->name('students_create')->middleware('can:create-students');
+    Route::post('/students', [StudentController::class, 'store'])->name('students_store')->middleware('can:create-students');
+
     Route::get('/grades', [GradeController::class, 'list'])->name('grades_list');
     Route::get('/grades/form/{id?}', [GradeController::class, 'form'])->name('grades_form');
     Route::post('/grades/save/{id?}', [GradeController::class, 'save'])->name('grades_save');
@@ -123,6 +145,4 @@ Route::middleware('auth')->group(function () {
 
 Route::get('test', function () {
     return "Test is working!";
-
-    
 });

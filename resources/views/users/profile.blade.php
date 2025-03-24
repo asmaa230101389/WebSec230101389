@@ -14,6 +14,7 @@
             <div class="card-body">
                 <p><strong>Name:</strong> {{ $user->name }}</p>
                 <p><strong>Email:</strong> {{ $user->email }}</p>
+                <p><strong>Credit:</strong> {{ $user->credit }}</p>
             </div>
         </div>
     </div>
