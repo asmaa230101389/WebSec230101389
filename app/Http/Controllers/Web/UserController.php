@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller; // أضيفي السطر ده
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -12,24 +13,28 @@ class UserController extends Controller
     {
         return view('users.register');
     }
-
     public function doRegister(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|min:5',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|confirmed|min:8',
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8|confirmed',
         ]);
-
-        $user = new User();
-        $user->name = $request->name;
-        $user->email = $request->email;
-        $user->password = bcrypt($request->password);
-        $user->save();
-
-        return redirect('/')->with('success', 'Registered successfully!');
+    
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
+    
+        $user->assignRole('Customer'); // تعيين دور Customer
+    
+        Auth::login($user);
+    
+        return redirect('/users/profile');
     }
 
+    
     public function login(Request $request)
     {
         return view('users.login');
@@ -56,9 +61,9 @@ class UserController extends Controller
         $users = User::all();
         return view('users.list', compact('users'));
     }
-public function profile(Request $request)
-{
-    $user = auth()->user();
-    return view('users.profile', compact('user'));
-}
+    public function profile()
+    {
+        $user = auth()->user();
+        return view('users.profile', compact('user'));
+    }
 }
