@@ -126,27 +126,34 @@ class UserController extends Controller
      */
     public function verify(Request $request)
     {
-        // Check if the URL signature is valid
+        Log::info('Verify request received', [
+            'email' => $request->query('email'),
+            'token' => $request->query('token'),
+            'signature' => $request->query('signature'),
+        ]);
+
         if (!$request->hasValidSignature()) {
+            Log::error('Invalid or expired verification link', ['email' => $request->query('email')]);
             return redirect()->route('login')->withErrors(['email' => 'The verification link is invalid or has expired.']);
         }
 
         $email = $request->query('email');
         $user = User::where('email', $email)->first();
 
-        // Check if user exists
         if (!$user) {
+            Log::error('User not found for verification', ['email' => $email]);
             return redirect()->route('login')->withErrors(['email' => 'User not found.']);
         }
 
-        // Check if email is already verified
         if ($user->email_verified_at) {
+            Log::info('Email already verified', ['email' => $email]);
             return redirect()->route('login')->with('info', 'Your email is already verified.');
         }
 
-        // Mark email as verified
         $user->email_verified_at = now();
         $user->save();
+
+        Log::info('Email verified successfully', ['email' => $email]);
 
         return view('users.verified', ['user' => $user]);
     }
