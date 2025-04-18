@@ -85,6 +85,7 @@ Route::post('register', [UserController::class, 'doRegister'])->name('do_registe
 Route::get('login', [UserController::class, 'login'])->name('login');
 Route::post('login', [UserController::class, 'doLogin'])->name('do_login');
 Route::get('logout', [UserController::class, 'doLogout'])->name('do_logout');
+Route::post('resend-verification', [UserController::class, 'resendVerification'])->name('resend_verification');
 
 Route::get('/test-email', function () {
     Mail::to('asesmaiel9@gmail.com')->send(new VerificationEmail('https://example.com/verify', 'Test User'));

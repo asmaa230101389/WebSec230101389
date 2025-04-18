@@ -1,4 +1,3 @@
-```
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +7,10 @@
 </head>
 <body>
     <p>Dear {{ $name }},</p>
-    <p>Please click the following link to verify your account:</p>
-    <p><a href="{{ $link }}" target="_blank">Verification Link</a></p>
+    <p>Please click on the following link to verify your email address:</p>
+    <p><a href="{{ $link }}" target="_blank">Verify Email</a></p>
+    <p>If you did not create an account, no further action is required.</p>
+    <p>Thank you,</p>
+    <p>{{ config('app.name') }} Team</p>
 </body>
 </html>
