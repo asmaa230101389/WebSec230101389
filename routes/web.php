@@ -7,6 +7,8 @@ use App\Http\Controllers\Web\UserController;
 use App\Http\Controllers\Web\GradeController;
 use App\Http\Controllers\Web\QuestionController;
 use App\Http\Controllers\Web\EmployeeController;
+use App\Mail\VerificationEmail;
+use Illuminate\Support\Facades\Mail;
 
 Route::get('/', function () {
     return view('home');
@@ -84,6 +86,15 @@ Route::get('login', [UserController::class, 'login'])->name('login');
 Route::post('login', [UserController::class, 'doLogin'])->name('do_login');
 Route::get('logout', [UserController::class, 'doLogout'])->name('do_logout');
 
+Route::get('/test-email', function () {
+    Mail::to('asesmaiel9@gmail.com')->send(new VerificationEmail('https://example.com/verify', 'Test User'));
+    return 'Email sent!';
+});
+
+Route::get('/test', function () {
+    return 'Test is working!';
+});
+
 Route::middleware('auth')->group(function () {
     Route::get('/users', [UserController::class, 'list'])->name('users_list');
     Route::get('/users/form/{id?}', [UserController::class, 'form'])->name('users_form');
@@ -91,12 +102,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/users/delete/{id}', [UserController::class, 'delete'])->name('users_delete');
 
     Route::get('/users/profile', [UserController::class, 'profile'])->name('users.profile');
+    Route::get('/verify', [UserController::class, 'verify'])->name('verify');
 
-    // Products (للجميع لكن الشراء للـ Customers بس)
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
     Route::post('/products/{id}/purchase', [ProductController::class, 'purchase'])->name('products.purchase')->middleware('can:purchase-products');
 
-    // Products Management (للـ Employees والـ Admin)
     Route::middleware(['can:manage-products'])->group(function () {
         Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
         Route::post('/products', [ProductController::class, 'store'])->name('products.store');
@@ -105,19 +115,16 @@ Route::middleware('auth')->group(function () {
         Route::delete('/products/{id}', [ProductController::class, 'destroy'])->name('products.destroy');
     });
 
-    // Employee Management (للـ Admin بس)
     Route::middleware(['can:create-employees'])->group(function () {
         Route::get('/employees/create', [EmployeeController::class, 'create'])->name('employees.create');
         Route::post('/employees', [EmployeeController::class, 'store'])->name('employees.store');
     });
 
-    // Employee Actions (للـ Employees والـ Admin)
     Route::middleware(['can:view-customers'])->group(function () {
         Route::get('/employees/customers', [EmployeeController::class, 'customers'])->name('employees.customers');
         Route::post('/employees/customers/{id}/add-credit', [EmployeeController::class, 'addCredit'])->name('employees.add-credit')->middleware('can:add-credit');
     });
 
-    // Purchases (للـ Customers)
     Route::get('/purchases', function () {
         $purchases = \App\Models\Purchase::where('user_id', auth()->id())->get();
         return view('purchases.index', compact('purchases'));
@@ -141,8 +148,4 @@ Route::middleware('auth')->group(function () {
     Route::get('/questions/delete/{id}', [QuestionController::class, 'delete'])->name('questions_delete');
     Route::get('/exam', [QuestionController::class, 'startExam'])->name('exam_start');
     Route::post('/exam/submit', [QuestionController::class, 'submitExam'])->name('exam_submit');
-});
-
-Route::get('test', function () {
-    return "Test is working!";
 });
