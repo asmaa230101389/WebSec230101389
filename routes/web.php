@@ -86,10 +86,7 @@ Route::get('login', [UserController::class, 'login'])->name('login');
 Route::post('login', [UserController::class, 'doLogin'])->name('do_login');
 Route::get('logout', [UserController::class, 'doLogout'])->name('do_logout');
 
-Route::get('/test-email', function () {
-    Mail::to('asesmaiel9@gmail.com')->send(new VerificationEmail('https://example.com/verify', 'Test User'));
-    return 'Email sent!';
-});
+Route::get('verify', [UserController::class, 'verify'])->name('verify');
 
 Route::get('/test', function () {
     return 'Test is working!';
@@ -102,7 +99,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/users/delete/{id}', [UserController::class, 'delete'])->name('users_delete');
 
     Route::get('/users/profile', [UserController::class, 'profile'])->name('users.profile');
-    Route::get('/verify', [UserController::class, 'verify'])->name('verify');
 
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
     Route::post('/products/{id}/purchase', [ProductController::class, 'purchase'])->name('products.purchase')->middleware('can:purchase-products');

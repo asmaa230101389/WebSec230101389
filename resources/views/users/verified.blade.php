@@ -1,12 +1,10 @@
 @extends('layouts.master')
-
-@section('title', 'Email Verification')
-
+@section('title', 'User Profile')
 @section('content')
 <div class="row">
     <div class="m-4 col-sm-6">
         <div class="alert alert-success">
-            <strong>Congratulations!</strong> Dear {{ $user->name }}, your email {{ $user->email }} has been verified.
+            <strong>Congratulation!</strong> Dear {{ $user->name }}, your email {{ $user->email }} is verified.
         </div>
     </div>
 </div>
