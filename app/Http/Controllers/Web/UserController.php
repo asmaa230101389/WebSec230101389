@@ -120,7 +120,14 @@ class UserController extends Controller
     {
         $credentials = $request->only('email', 'password');
 
-        if (Auth::attempt($credentials)) {
+        $user = User::where('email', $request->email)->first();
+
+        if ($user && Hash::check($request->password, $user->password)) {
+            if (!$user->email_verified_at) {
+                return back()->withErrors(['email' => 'Your email is not verified. Please check your inbox or spam folder.']);
+            }
+
+            Auth::login($user);
             return redirect()->route('home')->with('success', 'Logged in successfully!');
         }
 
