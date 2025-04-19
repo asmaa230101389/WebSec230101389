@@ -10,19 +10,20 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
     /**
      * Show the registration form.
      */
-    public function register(Request $request)
+    public function showRegisterForm()
     {
-        return view('users.register');
+        return view('register');
     }
 
     /**
-     * Handle user registration and send verification email.
+     * Handle registration request.
      */
     public function doRegister(Request $request)
     {
@@ -32,93 +33,28 @@ class UserController extends Controller
             'password' => 'required|string|min:8|confirmed',
         ]);
 
-        // Create new user
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
 
-        // Assign 'Customer' role
-        $user->assignRole('Customer');
-
-        // Generate signed verification link (valid for 24 hours)
+        // Generate verification link
         $verificationLink = url()->temporarySignedRoute(
             'verify',
             now()->addHours(24),
             ['email' => $user->email, 'token' => Str::random(60)]
         );
 
-        // Send verification email
-        Mail::to($user->email)->send(new VerificationEmail($verificationLink, $user->name));
-
-        return redirect()->route('login')->with('success', 'Registration successful! Please check your email to verify your account.');
-    }
-
-    /**
-     * Show the login form.
-     */
-    public function login(Request $request)
-    {
-        return view('users.login');
-    }
-
-    /**
-     * Handle user login with email verification check.
-     */
-    public function doLogin(Request $request)
-    {
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
+        Log::info('Verification link generated', [
+            'email' => $user->email,
+            'link' => $verificationLink,
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        // Send verification email
+        Mail::to($user->email)->send(new VerificationEmail($user, $verificationLink));
 
-        // Check if user exists and password is correct
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return redirect()->back()->withErrors(['email' => 'Invalid email or password.']);
-        }
-
-        // Check if email is verified
-        if (!$user->email_verified_at) {
-            return redirect()->back()->withErrors(['email' => 'Your email is not verified. Please check your inbox or spam folder.']);
-        }
-
-        // Log user in
-        Auth::login($user);
-
-        return redirect('/')->with('success', 'Logged in successfully!');
-    }
-
-    /**
-     * Handle user logout.
-     */
-    public function doLogout(Request $request)
-    {
-        Auth::logout();
-        return redirect('/')->with('success', 'Logged out successfully!');
-    }
-
-    /**
-     * List all users (for authorized users only).
-     */
-    public function list(Request $request)
-    {
-        if (!auth()->user()->hasPermissionTo('view users')) {
-            return redirect('/')->with('error', 'You are not authorized to view this page.');
-        }
-        $users = User::all();
-        return view('users.list', compact('users'));
-    }
-
-    /**
-     * Show user profile.
-     */
-    public function profile()
-    {
-        $user = auth()->user();
-        return view('users.profile', compact('user'));
+        return redirect()->route('login')->with('success', 'Registration successful! Please check your email to verify your account.');
     }
 
     /**
@@ -130,10 +66,21 @@ class UserController extends Controller
             'email' => $request->query('email'),
             'token' => $request->query('token'),
             'signature' => $request->query('signature'),
+            'full_url' => $request->fullUrl(),
         ]);
 
+        // Check if signature is present
+        if (!$request->has('signature')) {
+            Log::error('No signature provided in verification link', ['email' => $request->query('email')]);
+            return redirect()->route('login')->withErrors(['email' => 'Verification link is missing signature.']);
+        }
+
+        // Check if the URL signature is valid
         if (!$request->hasValidSignature()) {
-            Log::error('Invalid or expired verification link', ['email' => $request->query('email')]);
+            Log::error('Invalid or expired verification link', [
+                'email' => $request->query('email'),
+                'signature' => $request->query('signature'),
+            ]);
             return redirect()->route('login')->withErrors(['email' => 'The verification link is invalid or has expired.']);
         }
 
@@ -159,31 +106,24 @@ class UserController extends Controller
     }
 
     /**
-     * Resend verification email.
+     * Show the login form.
      */
-    public function resendVerification(Request $request)
+    public function showLoginForm()
     {
-        $request->validate([
-            'email' => 'required|email|exists:users,email',
-        ]);
+        return view('login');
+    }
 
-        $user = User::where('email', $request->email)->first();
+    /**
+     * Handle login request.
+     */
+    public function doLogin(Request $request)
+    {
+        $credentials = $request->only('email', 'password');
 
-        // Check if email is already verified
-        if ($user->email_verified_at) {
-            return redirect()->back()->with('info', 'Your email is already verified.');
+        if (Auth::attempt($credentials)) {
+            return redirect()->route('home')->with('success', 'Logged in successfully!');
         }
 
-        // Generate new signed verification link
-        $verificationLink = url()->temporarySignedRoute(
-            'verify',
-            now()->addHours(24),
-            ['email' => $user->email, 'token' => Str::random(60)]
-        );
-
-        // Send verification email
-        Mail::to($user->email)->send(new VerificationEmail($verificationLink, $user->name));
-
-        return redirect()->back()->with('success', 'Verification email resent! Please check your inbox or spam folder.');
+        return back()->withErrors(['email' => 'Invalid email or password.']);
     }
 }

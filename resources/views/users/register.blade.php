@@ -1,50 +1,48 @@
-@extends('layouts.master')
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register</title>
+</head>
+<body>
+    <h2>Register</h2>
 
-@section('title', 'Register')
-
-@section('content')
-<div class="container">
-    <h1 class="mt-5">Register</h1>
-    @if ($errors->any())
-        <div class="alert alert-danger">
-            @foreach ($errors->all() as $error)
-                <p>{{ $error }}</p>
-            @endforeach
-        </div>
-    @endif
     @if (session('success'))
-        <div class="alert alert-success">
-            {{ session('success') }}
+        <div style="color: green;">{{ session('success') }}</div>
+    @endif
+
+    @if ($errors->any())
+        <div style="color: red;">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
         </div>
     @endif
-    <form action="{{ route('do_register') }}" method="post">
+
+    <form method="POST" action="{{ route('doRegister') }}">
         @csrf
-        <div class="form-group mb-2">
+        <div>
             <label for="name">Name:</label>
-            <input type="text" class="form-control @error('name') is-invalid @enderror" name="name" value="{{ old('name') }}" required>
-            @error('name')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
+            <input type="text" name="name" id="name" value="{{ old('name') }}" required>
         </div>
-        <div class="form-group mb-2">
+        <div>
             <label for="email">Email:</label>
-            <input type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required>
-            @error('email')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
+            <input type="email" name="email" id="email" value="{{ old('email') }}" required>
         </div>
-        <div class="form-group mb-2">
+        <div>
             <label for="password">Password:</label>
-            <input type="password" class="form-control @error('password') is-invalid @enderror" name="password" required>
-            @error('password')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
+            <input type="password" name="password" id="password" required>
         </div>
-        <div class="form-group mb-2">
-            <label for="password_confirmation">Password Confirmation:</label>
-            <input type="password" class="form-control" name="password_confirmation" required>
+        <div>
+            <label for="password_confirmation">Confirm Password:</label>
+            <input type="password" name="password_confirmation" id="password_confirmation" required>
         </div>
-        <button type="submit" class="btn btn-primary">Register</button>
+        <div>
+            <button type="submit">Register</button>
+        </div>
     </form>
-</div>
-@endsection
+
+    <p>Already have an account? <a href="{{ route('login') }}">Login here</a></p>
+</body>
+</html>
