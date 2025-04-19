@@ -97,7 +97,7 @@ Route::get('crypto', [CryptoController::class, 'showForm'])->name('crypto.form')
 Route::post('crypto/encrypt', [CryptoController::class, 'encrypt'])->name('crypto.encrypt');
 Route::post('crypto/decrypt', [CryptoController::class, 'decrypt'])->name('crypto.decrypt');
 
-Route::get('password/reset', [UserController::class, 'showResetRequestForm'])->name('password.request');
+Route::get('password/request', [UserController::class, 'showResetRequestForm'])->name('password.request');
 Route::post('password/email', [UserController::class, 'sendResetLinkEmail'])->name('password.email');
 Route::get('password/reset/{token}', [UserController::class, 'showResetForm'])->name('password.reset');
 Route::post('password/reset', [UserController::class, 'reset'])->name('password.update');

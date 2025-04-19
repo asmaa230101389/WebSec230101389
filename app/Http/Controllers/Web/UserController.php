@@ -167,7 +167,7 @@ class UserController extends Controller
 
     public function showResetRequestForm()
     {
-        return view('users.password_request');
+        return view('password_request');
     }
 
     public function sendResetLinkEmail(Request $request)
@@ -200,7 +200,7 @@ class UserController extends Controller
 
     public function showResetForm(Request $request, $token)
     {
-        return view('users.password_reset', ['token' => $token, 'email' => $request->email]);
+        return view('password_reset', ['token' => $token, 'email' => $request->email]);
     }
 
     public function reset(Request $request)
