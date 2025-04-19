@@ -80,26 +80,17 @@ Route::post('/gpa', function (Illuminate\Http\Request $request) {
     return view('gpa', compact('gpa', 'grades', 'hours'));
 });
 
-Route::get('/register', [UserController::class, 'showRegisterForm'])->name('register');
-Route::post('/register', [UserController::class, 'doRegister'])->name('doRegister');
+Route::get('register', [UserController::class, 'register'])->name('register');
+Route::post('register', [UserController::class, 'doRegister'])->name('do_register');
+Route::get('login', [UserController::class, 'login'])->name('login');
+Route::post('login', [UserController::class, 'doLogin'])->name('do_login');
+Route::get('logout', [UserController::class, 'doLogout'])->name('do_logout');
 
-Route::get('/verify', [UserController::class, 'verify'])->name('verify');
-
-Route::get('/login', [UserController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [UserController::class, 'doLogin'])->name('doLogin');
-
-Route::get('/', function () {
-    return view('home');
-})->name('home');
-
-// مسار اختبار الإيميل
 Route::get('/test-email', function () {
-    \Illuminate\Support\Facades\Mail::to('asesmaiel9@gmail.com')->send(new \App\Mail\VerificationEmail(
-        new \App\Models\User(['name' => 'Test User', 'email' => 'asesmaiel9@gmail.com']),
-        'http://127.0.0.1:8000/verify'
-    ));
+    Mail::to('asesmaiel9@gmail.com')->send(new VerificationEmail('https://example.com/verify', 'Test User'));
     return 'Email sent!';
 });
+
 Route::get('/test', function () {
     return 'Test is working!';
 });
