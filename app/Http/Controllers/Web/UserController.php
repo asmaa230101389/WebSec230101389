@@ -10,7 +10,10 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
-use App\Mail\VerificationEmail; // تأكدي إن السطر ده موجود وصحيح
+use App\Mail\VerificationEmail;
+use App\Mail\ResetPasswordEmail;
+use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
@@ -124,5 +127,110 @@ class UserController extends Controller
         Log::info('Email verified for user ID: ' . $userId);
 
         return view('users.verified', ['user' => $user]);
+    }
+
+    public function redirectToGoogle()
+    {
+        return Socialite::driver('google')->redirect();
+    }
+
+    public function handleGoogleCallback()
+    {
+        try {
+            $googleUser = Socialite::driver('google')->user();
+            $user = User::where('google_id', $googleUser->id)->orWhere('email', $googleUser->email)->first();
+
+            if ($user) {
+                if (!$user->google_id) {
+                    $user->google_id = $googleUser->id;
+                    $user->save();
+                }
+            } else {
+                $user = User::create([
+                    'name' => $googleUser->name,
+                    'email' => $googleUser->email,
+                    'google_id' => $googleUser->id,
+                    'email_verified_at' => now(),
+                    'password' => Hash::make(Str::random(16)),
+                ]);
+                $user->assignRole('Customer');
+            }
+
+            Auth::login($user);
+
+            return redirect('/')->with('success', 'Logged in with Google successfully!');
+        } catch (\Exception $e) {
+            Log::error('Google OAuth error: ' . $e->getMessage());
+            return redirect()->route('login')->withErrors(['Google login failed. Please try again.']);
+        }
+    }
+
+    public function showResetRequestForm()
+    {
+        return view('users.password_request');
+    }
+
+    public function sendResetLinkEmail(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return back()->withErrors(['email' => 'We cannot find a user with that email address.']);
+        }
+
+        $token = Str::random(60);
+
+        DB::table('password_reset_tokens')->updateOrInsert(
+            ['email' => $user->email],
+            ['token' => $token, 'created_at' => now()]
+        );
+
+        $resetLink = url()->temporarySignedRoute(
+            'password.reset',
+            now()->addHours(1),
+            ['token' => $token, 'email' => $user->email]
+        );
+
+        Mail::to($user->email)->send(new ResetPasswordEmail($resetLink, $user->name));
+
+        return back()->with('success', 'We have emailed your password reset link!');
+    }
+
+    public function showResetForm(Request $request, $token)
+    {
+        return view('users.password_reset', ['token' => $token, 'email' => $request->email]);
+    }
+
+    public function reset(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string|min:8|confirmed',
+            'token' => 'required',
+        ]);
+
+        $passwordReset = DB::table('password_reset_tokens')
+            ->where('email', $request->email)
+            ->where('token', $request->token)
+            ->first();
+
+        if (!$passwordReset) {
+            return back()->withErrors(['email' => 'Invalid token or email.']);
+        }
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return back()->withErrors(['email' => 'We cannot find a user with that email address.']);
+        }
+
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+
+        return redirect()->route('login')->with('success', 'Your password has been reset!');
     }
 }

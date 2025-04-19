@@ -7,9 +7,11 @@ use App\Http\Controllers\Web\UserController;
 use App\Http\Controllers\Web\GradeController;
 use App\Http\Controllers\Web\QuestionController;
 use App\Http\Controllers\Web\EmployeeController;
+use App\Http\Controllers\Web\CryptoController;
 use App\Mail\VerificationEmail;
 use Illuminate\Support\Facades\Mail;
 
+// باقي الـ routes اللي عندك
 Route::get('/', function () {
     return view('home');
 });
@@ -87,6 +89,18 @@ Route::post('login', [UserController::class, 'doLogin'])->name('do_login');
 Route::get('logout', [UserController::class, 'doLogout'])->name('do_logout');
 
 Route::get('verify', [UserController::class, 'verify'])->name('verify');
+
+Route::get('auth/google', [UserController::class, 'redirectToGoogle'])->name('auth.google');
+Route::get('auth/google/callback', [UserController::class, 'handleGoogleCallback']);
+
+Route::get('crypto', [CryptoController::class, 'showForm'])->name('crypto.form');
+Route::post('crypto/encrypt', [CryptoController::class, 'encrypt'])->name('crypto.encrypt');
+Route::post('crypto/decrypt', [CryptoController::class, 'decrypt'])->name('crypto.decrypt');
+
+Route::get('password/reset', [UserController::class, 'showResetRequestForm'])->name('password.request');
+Route::post('password/email', [UserController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::get('password/reset/{token}', [UserController::class, 'showResetForm'])->name('password.reset');
+Route::post('password/reset', [UserController::class, 'reset'])->name('password.update');
 
 Route::get('/test', function () {
     return 'Test is working!';
