@@ -28,5 +28,6 @@
     </form>
     <hr>
     <a href="{{ route('auth.google') }}" class="btn btn-danger">Login with Google</a>
+    <a href="{{ route('auth.facebook') }}" class="btn btn-primary" style="background-color: #4267B2;">Login with Facebook</a>
 </div>
 @endsection

@@ -15,7 +15,6 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
 
-// باقي الـ routes اللي عندك
 Route::get('/', function () {
     return view('home');
 });
@@ -97,6 +96,44 @@ Route::get('verify', [UserController::class, 'verify'])->name('verify');
 Route::get('auth/google', [UserController::class, 'redirectToGoogle'])->name('auth.google');
 Route::get('auth/google/callback', [UserController::class, 'handleGoogleCallback']);
 
+// Routes لتسجيل الدخول بفيسبوك
+Route::get('auth/facebook', function () {
+    return Socialite::driver('facebook')->scopes(['public_profile'])->redirect();
+})->name('auth.facebook');
+
+Route::get('callback/facebook', function () {
+    try {
+        $facebookUser = Socialite::driver('facebook')->user();
+        $user = User::where('facebook_id', $facebookUser->id)->first();
+
+        if ($user) {
+            Auth::login($user, true);
+            session()->regenerate();
+            // إضافة رسالة نجاح
+            session()->flash('success', 'Logged in successfully with Facebook!');
+            return redirect()->intended('/home');
+        } else {
+            $newUser = User::create([
+                'name' => $facebookUser->name,
+                'email' => $facebookUser->email ?? 'facebook_user_' . $facebookUser->id . '@example.com',
+                'facebook_id' => $facebookUser->id,
+                'password' => bcrypt('dummy-password'),
+            ]);
+            Auth::login($newUser, true);
+            session()->regenerate();
+            // إضافة رسالة نجاح
+            session()->flash('success', 'Logged in successfully with Facebook!');
+            return redirect()->intended('/home');
+        }
+    } catch (\Exception $e) {
+        // لو حصل خطأ، هنعرضه بدل ما يحصل redirect loop
+        return redirect('/login')->with('error', 'Failed to login with Facebook: ' . $e->getMessage());
+    }
+});
+Route::get('/home', function () {
+    return view('home');
+})->name('home');
+
 Route::get('crypto', [CryptoController::class, 'showForm'])->name('crypto.form');
 Route::post('crypto/encrypt', [CryptoController::class, 'encrypt'])->name('crypto.encrypt');
 Route::post('crypto/decrypt', [CryptoController::class, 'decrypt'])->name('crypto.decrypt');
@@ -105,37 +142,6 @@ Route::get('password/request', [UserController::class, 'showResetRequestForm'])-
 Route::post('password/email', [UserController::class, 'sendResetLinkEmail'])->name('password.email');
 Route::get('password/reset/{token}', [UserController::class, 'showResetForm'])->name('password.reset');
 Route::post('password/reset', [UserController::class, 'reset'])->name('password.update');
-
-Route::get('/', function () {
-    return view('asmaa_login');
-});
-
-Route::get('/auth/facebook', function () {
-    return Socialite::driver('facebook')->redirect();
-});
-
-Route::get('/callback/facebook', function () {
-    try {
-        $facebookUser = Socialite::driver('facebook')->user();
-        $user = User::where('facebook_id', $facebookUser->id)->first();
-
-        if ($user) {
-            Auth::login($user);
-            return redirect('/home');
-        } else {
-            $newUser = User::create([
-                'name' => $facebookUser->name,
-                'email' => $facebookUser->email,
-                'facebook_id' => $facebookUser->id,
-                'password' => bcrypt('dummy-password'),
-            ]);
-            Auth::login($newUser);
-            return redirect('/home');
-        }
-    } catch (\Exception $e) {
-        dd($e->getMessage());
-    }
-});
 
 Route::get('/test', function () {
     return 'Test is working!';
