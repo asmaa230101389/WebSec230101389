@@ -10,6 +10,9 @@ use App\Http\Controllers\Web\EmployeeController;
 use App\Http\Controllers\Web\CryptoController;
 use App\Mail\VerificationEmail;
 use Illuminate\Support\Facades\Mail;
+
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
 
 // باقي الـ routes اللي عندك
@@ -103,13 +106,35 @@ Route::post('password/email', [UserController::class, 'sendResetLinkEmail'])->na
 Route::get('password/reset/{token}', [UserController::class, 'showResetForm'])->name('password.reset');
 Route::post('password/reset', [UserController::class, 'reset'])->name('password.update');
 
+Route::get('/', function () {
+    return view('asmaa_login');
+});
+
 Route::get('/auth/facebook', function () {
     return Socialite::driver('facebook')->redirect();
 });
 
 Route::get('/callback/facebook', function () {
-    $user = Socialite::driver('facebook')->user();
-    dd($user); // مؤقتًا عشان نشوف بيانات المستخدم
+    try {
+        $facebookUser = Socialite::driver('facebook')->user();
+        $user = User::where('facebook_id', $facebookUser->id)->first();
+
+        if ($user) {
+            Auth::login($user);
+            return redirect('/home');
+        } else {
+            $newUser = User::create([
+                'name' => $facebookUser->name,
+                'email' => $facebookUser->email,
+                'facebook_id' => $facebookUser->id,
+                'password' => bcrypt('dummy-password'),
+            ]);
+            Auth::login($newUser);
+            return redirect('/home');
+        }
+    } catch (\Exception $e) {
+        dd($e->getMessage());
+    }
 });
 
 Route::get('/test', function () {

@@ -15,6 +15,7 @@ class User extends Authenticatable
         'password',
         'credit',
         'email_verified_at', // Added to fillable
+        'facebook_id',
     ];
 
     protected $hidden = [
