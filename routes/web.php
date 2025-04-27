@@ -103,33 +103,62 @@ Route::get('auth/facebook', function () {
 
 Route::get('callback/facebook', function () {
     try {
-        $facebookUser = Socialite::driver('facebook')->user();
+        // نجيب الـ access token مباشرة من فيسبوك
+        $driver = Socialite::driver('facebook');
+        $token = $driver->getAccessTokenResponse(request()->input('code'));
+
+        // نطبع الـ access token عشان نشوف إيه اللي راجع
+        dd('Access Token Response: ', $token);
+
+        // نكمّل بجيب بيانات المستخدم
+        $facebookUser = $driver->user();
+
+        // نطبع بيانات المستخدم
+        dd('Facebook User Data: ', $facebookUser);
+
+        // باقي الكود زي ما هو
         $user = User::where('facebook_id', $facebookUser->id)->first();
 
         if ($user) {
             Auth::login($user, true);
             session()->regenerate();
-            // إضافة رسالة نجاح
             session()->flash('success', 'Logged in successfully with Facebook!');
-            return redirect()->intended('/home');
-        } else {
-            $newUser = User::create([
-                'name' => $facebookUser->name,
-                'email' => $facebookUser->email ?? 'facebook_user_' . $facebookUser->id . '@example.com',
-                'facebook_id' => $facebookUser->id,
-                'password' => bcrypt('dummy-password'),
-            ]);
-            Auth::login($newUser, true);
-            session()->regenerate();
-            // إضافة رسالة نجاح
-            session()->flash('success', 'Logged in successfully with Facebook!');
-            return redirect()->intended('/home');
+            return redirect('/home');
         }
+
+        $existingUser = User::where('email', $facebookUser->email)->first();
+
+        if ($existingUser) {
+            $existingUser->facebook_id = $facebookUser->id;
+            $existingUser->save();
+
+            Auth::login($existingUser, true);
+            session()->regenerate();
+            session()->flash('success', 'Logged in successfully with Facebook! Your account has been linked.');
+            return redirect('/home');
+        }
+
+        $newUser = User::create([
+            'name' => $facebookUser->name,
+            'email' => $facebookUser->email ?? 'facebook_user_' . $facebookUser->id . '@example.com',
+            'facebook_id' => $facebookUser->id,
+            'password' => bcrypt('dummy-password'),
+        ]);
+
+        Auth::login($newUser, true);
+        session()->regenerate();
+        session()->flash('success', 'Logged in successfully with Facebook!');
+        return redirect('/home');
     } catch (\Exception $e) {
-        // لو حصل خطأ، هنعرضه بدل ما يحصل redirect loop
-        return redirect('/login')->with('error', 'Failed to login with Facebook: ' . $e->getMessage());
+        dd('Facebook Login Error: ' . $e->getMessage(), $e->getTraceAsString());
     }
 });
+
+
+Route::get('privacy-policy', function () {
+    return "Privacy Policy for WebSecServiceLogin";
+});
+
 Route::get('/home', function () {
     return view('home');
 })->name('home');
@@ -199,4 +228,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/questions/delete/{id}', [QuestionController::class, 'delete'])->name('questions_delete');
     Route::get('/exam', [QuestionController::class, 'startExam'])->name('exam_start');
     Route::post('/exam/submit', [QuestionController::class, 'submitExam'])->name('exam_submit');
+
+    
+    
 });
