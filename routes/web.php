@@ -10,6 +10,7 @@ use App\Http\Controllers\Web\EmployeeController;
 use App\Http\Controllers\Web\CryptoController;
 use App\Mail\VerificationEmail;
 use Illuminate\Support\Facades\Mail;
+use Laravel\Socialite\Facades\Socialite;
 
 // باقي الـ routes اللي عندك
 Route::get('/', function () {
@@ -101,6 +102,15 @@ Route::get('password/request', [UserController::class, 'showResetRequestForm'])-
 Route::post('password/email', [UserController::class, 'sendResetLinkEmail'])->name('password.email');
 Route::get('password/reset/{token}', [UserController::class, 'showResetForm'])->name('password.reset');
 Route::post('password/reset', [UserController::class, 'reset'])->name('password.update');
+
+Route::get('/auth/facebook', function () {
+    return Socialite::driver('facebook')->redirect();
+});
+
+Route::get('/callback/facebook', function () {
+    $user = Socialite::driver('facebook')->user();
+    dd($user); // مؤقتًا عشان نشوف بيانات المستخدم
+});
 
 Route::get('/test', function () {
     return 'Test is working!';
