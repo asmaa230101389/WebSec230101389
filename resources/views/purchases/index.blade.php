@@ -10,7 +10,17 @@
     @include('layouts.menu')
     <div class="container mt-5">
         <h1>My Purchases</h1>
-        <table class="table table-striped">
+        @if (session('success'))
+            <div class="alert alert-success">
+                {{ session('success') }}
+            </div>
+        @endif
+        @if (session('error'))
+            <div class="alert alert-danger">
+                {{ session('error') }}
+            </div>
+        @endif
+        <table class="table table-bordered">
             <thead>
                 <tr>
                     <th>ID</th>
@@ -21,7 +31,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($purchases as $purchase)
+                @forelse ($purchases as $purchase)
                     <tr>
                         <td>{{ $purchase->id }}</td>
                         <td>{{ $purchase->product->name }}</td>
@@ -29,7 +39,11 @@
                         <td>{{ $purchase->total_price }}</td>
                         <td>{{ $purchase->created_at }}</td>
                     </tr>
-                @endforeach
+                @empty
+                    <tr>
+                        <td colspan="5">No purchases found.</td>
+                    </tr>
+                @endforelse
             </tbody>
         </table>
     </div>

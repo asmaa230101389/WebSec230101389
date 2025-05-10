@@ -3,7 +3,9 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Models\Purchase;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ProductController extends Controller
 {
@@ -61,16 +63,17 @@ class ProductController extends Controller
     public function purchase(Request $request, $id)
     {
         $product = Product::findOrFail($id);
-        $user = auth()->user();
-        $quantity = $request->input('quantity', 1);
+        $quantity = $request->quantity;
 
-        if ($product->stock < $quantity) {
-            return redirect('/products')->with('error', 'Not enough stock available.');
+        if ($quantity > $product->stock) {
+            return redirect('/products')->with('error', 'Not enough stock available');
         }
 
+        $user = Auth::user();
         $totalPrice = $product->price * $quantity;
+
         if ($user->credit < $totalPrice) {
-            return redirect('/products')->with('error', 'Insufficient credit.');
+            return redirect('/products')->with('error', 'Insufficient credit');
         }
 
         $user->credit -= $totalPrice;
@@ -79,7 +82,7 @@ class ProductController extends Controller
         $product->stock -= $quantity;
         $product->save();
 
-        \App\Models\Purchase::create([
+        Purchase::create([
             'user_id' => $user->id,
             'product_id' => $product->id,
             'quantity' => $quantity,
